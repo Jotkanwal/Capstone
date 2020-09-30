@@ -1,3 +1,3 @@
 # Capstone
 
-Temperature controlled Cabninet using Raspberry Pi 
+Temperature controlled Cabinet using Raspberry Pi
