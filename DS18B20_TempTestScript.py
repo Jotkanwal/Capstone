@@ -1,6 +1,6 @@
-import time #setting sleep delays
 from w1thermsensor import W1ThermSensor #https://pypi.org/project/w1thermsensor/
 from datetime import datetime #used for creating timestamps
+import time #used for waiting
 
 DS18B20_SENSOR = W1ThermSensor()
 
