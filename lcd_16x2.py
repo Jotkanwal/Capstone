@@ -77,7 +77,6 @@ class lcd_16x2():
     def __init__(self):
         # Init block
         GPIO.setwarnings(False)
-        GPIO.setmode(GPIO.BCM)       # Use BCM GPIO numbers
         GPIO.setup(self.LCD_E, GPIO.OUT)  # E
         GPIO.setup(self.LCD_RS, GPIO.OUT) # RS
         GPIO.setup(self.LCD_D4, GPIO.OUT) # DB4
