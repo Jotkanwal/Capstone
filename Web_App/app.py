@@ -9,6 +9,9 @@ import io
 import random
 import datetime
 
+import matplotlib.pyplot as plt
+import mpld3 as mpld
+
 #articles=Database()
 
 global temperature
@@ -26,7 +29,34 @@ app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
 #init MYSQL
 mysql = MySQL(app)
 
+# Histogram Generation Functions
+def GeneratePlot(numTimeIntervals) :
+    data = GetTempHistData(numTimeIntervals)
+    if data == -1:
+        return "<div><span>Unable to Generate Histogram</span></div>"
+    timeData = []
+    tempData = []
+    i=0
+    for rowTuple in data:
+        timeData[i+1] = rowTuple[0]
+        tempData[i] = rowTuple[1]
+        i=i+1
+    graph = plt.plot(timeData, tempData)
+    htmlText = mpld.fig_to_html(graph)
+    return htmlText
 
+def GetTempHistData(numTimeIntervals) :
+    with app.app_context():
+        cur = mysql.connection.cursor()
+        result=cur.execute("SELECT temperature from data")
+        result2 = cur.fetchall()
+
+    if 0 >= result:
+        return -1
+    else:
+        return result
+
+histogramHtmlText = GeneratePlot("3")
 
 @app.route('/')
 def index():
@@ -159,7 +189,7 @@ def dashboard():
     articles = cur.fetchall()
 
     if result>0:
-        return render_template('dashboard.html',articles=articles, form=form, mostRecent=mostRecent)
+        return render_template('dashboard.html',articles=articles, form=form, mostRecent=mostRecent, histHtml=histogramHtmlText)
     else:
         return render_template('dashboard.html',msg='No entries found')
 
