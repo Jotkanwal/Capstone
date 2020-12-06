@@ -3,18 +3,26 @@ from lcd_16x2 import lcd_16x2 #see lcd16_2.py
 from datetime import datetime #used for creating timestamps
 import time #used for waiting
 import RPi.GPIO as GPIO #raspi pin control
+import csv
 
 HEATER_RELAY_PIN = 21
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(HEATER_RELAY_PIN, GPIO.OUT)
 LCD = lcd_16x2()
 DS18B20_SENSOR = W1ThermSensor()
+fields = ['Time', 'Temp', 'State']
+rows = ['time', 'temp', 'state']
+filename = "histogram.csv"
+with open(filename, 'w') as csvfile:
+    csvwriter = csv.writer(csvfile)
+    csvwriter.writerow(fields)
 
 flag = True
-times_above_desired = 1
 relay = False
 desired_temp = 25
+duration = 1800 #heater duration in seconds
 LCD.lcd_init()
+start = time.time();
 
 def relay_on(pin):
     GPIO.output(pin,GPIO.LOW)
@@ -24,7 +32,25 @@ def relay_off(pin):
 
 while flag:
     now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    temp = DS18B20_SENSOR.get_temperature()
+    time_left = int(time.time() - start)
+    flag = (time_left <= duration)
+    print(time_left)
+    
+    try:
+        temp = DS18B20_SENSOR.get_temperature()
+    except:
+        print("temp error, resetting sensor and temp")
+        DS18B20_SENSOR = W1ThermSensor()
+        temp = desired_temp + 1
+    
+    if time_left % 5 == 0:
+        with open(filename, 'a') as csvfile:
+            csvwriter = csv.writer(csvfile)
+            rows = [now, str(temp), str(relay)]
+            print(rows)
+            
+            csvwriter.writerow(rows)
+        
     lcd_lmsg1 = "Cu:%.1f De:%.1f" % (temp, desired_temp)
     lcd_lmsg2 = "Heat:" + str(relay)
     
@@ -37,10 +63,9 @@ while flag:
     
     if temp < desired_temp:
         print("below")
-        if not relay:    
+        if not relay:
             print("flipped relay on")
             relay_on(HEATER_RELAY_PIN)
-            
         relay = True
     elif temp >= desired_temp:
         print("above")
@@ -48,9 +73,8 @@ while flag:
             print("flipped relay off")
             relay_off(HEATER_RELAY_PIN)
         relay = False
-        times_above_desired += 1
-        flag = times_above_desired <= 2
-    time.sleep(2)
+    
+    #time.sleep(0.5)
 
 print("tempurature reached, shutting down")
 LCD.cleanup()

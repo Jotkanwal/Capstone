@@ -158,4 +158,6 @@ class lcd_16x2():
     def cleanup(self):
         self.lcd_byte(0x01, self.LCD_CMD)
         self.lcd_string("Goodbye!",self.LCD_LINE_1)
+        time.sleep(2)
+        GPIO.output(self.LCD_E, False)
         GPIO.cleanup()
