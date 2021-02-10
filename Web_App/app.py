@@ -1,6 +1,6 @@
 from flask import Flask, render_template, flash, redirect, url_for, session, request, logging, Response
-#from data import Database
 from flask_mysqldb import MySQL
+from flask import Markup
 from wtforms import Form, StringField, TextAreaField, PasswordField, validators
 from passlib.hash import sha256_crypt
 from functools import wraps
@@ -8,7 +8,8 @@ import csv
 import io
 import random
 import datetime
-
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import mpld3 as mpld
 
@@ -20,9 +21,9 @@ temperature=0
 app = Flask(__name__)
 
 #Config flask_MYQL
-app.config['MYSQL_HOST'] = ''
-app.config['MYSQL_USER'] = ''
-app.config['MYSQL_PASSWORD'] = ''
+app.config['MYSQL_HOST'] = 'localhost'
+app.config['MYSQL_USER'] = 'root'
+app.config['MYSQL_PASSWORD'] = 'Poiu0981!('
 app.config['MYSQL_DB'] = 'capstone'
 app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
 
@@ -32,31 +33,34 @@ mysql = MySQL(app)
 # Histogram Generation Functions
 def GeneratePlot(numTimeIntervals) :
     data = GetTempHistData(numTimeIntervals)
+    print(data)
     if data == -1:
         return "<div><span>Unable to Generate Histogram</span></div>"
-    timeData = []
-    tempData = []
+    timeData=[]
+    tempData=[]
     i=0
+
     for rowTuple in data:
-        timeData[i+1] = rowTuple[0]
-        tempData[i] = rowTuple[1]
+        timeData.append(rowTuple['time'])
+        tempData.append(rowTuple['temp'])
         i=i+1
-    graph = plt.plot(timeData, tempData)
-    htmlText = mpld.fig_to_html(graph)
+
+    figure, graph=plt.subplots()
+    graph.plot(timeData, tempData)
+    graph.set(xlabel='Date (s)', ylabel='Temperature (C)', title='Temperature')
+    graph.grid()
+
+    htmlText = mpld.fig_to_html(figure)
     return htmlText
 
 def GetTempHistData(numTimeIntervals) :
     with app.app_context():
         cur = mysql.connection.cursor()
-        result=cur.execute("SELECT temperature from data")
-        result2 = cur.fetchall()
+        cur.execute("SELECT temperature AS temp, time FROM data")
+        result = cur.fetchall()
+        cur.close()
+    return result
 
-    if 0 >= result:
-        return -1
-    else:
-        return result
-
-histogramHtmlText = GeneratePlot("3")
 
 @app.route('/')
 def index():
@@ -162,9 +166,11 @@ def logout():
     flash("You are now logged out","Sucess")
     return redirect(url_for('login'))
 
+
 @app.route("/dashboard", methods=['GET', 'POST'])
 @is_logged_in
 def dashboard():
+    histogramHtmlText = Markup(GeneratePlot("3"))
 
     form = tempForm(request.form)
     if request.method == 'POST' and form.validate():
@@ -181,7 +187,7 @@ def dashboard():
 
     cur = mysql.connection.cursor()
 
-    current = cur.execute("SELECT * FROM data WHERE id IN (SELECT MAX(id) FROM data)")
+    cur.execute("SELECT * FROM data WHERE id IN (SELECT MAX(id) FROM data)")
     mostRecent = cur.fetchone()
 
     result = cur.execute("SELECT * FROM data")
