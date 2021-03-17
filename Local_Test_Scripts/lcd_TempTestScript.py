@@ -4,6 +4,7 @@ from datetime import datetime #used for creating timestamps
 import time #used for waiting
 import RPi.GPIO as GPIO #raspi pin control
 import csv
+from time import sleep
 
 HEATER_RELAY_PIN = 21
 GPIO.setmode(GPIO.BCM)
@@ -19,22 +20,47 @@ with open(filename, 'w') as csvfile:
 
 flag = True
 relay = False
-desired_temp = 25
+desired_temp = 22
 duration = 1800 #heater duration in seconds
 LCD.lcd_init()
 start = time.time();
 
+#digital encoder setup
+#clk = 1
+#dt = 0
+#GPIO.setup(clk, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+#GPIO.setup(dt, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+
+#clkLastState = GPIO.input(clk)
+
+
 def relay_on(pin):
+    print("the heater is switched")
     GPIO.output(pin,GPIO.LOW)
 
 def relay_off(pin):
     GPIO.output(pin,GPIO.HIGH)
+
+def check_encoder():
+    global clkLastState
+    global desired_temp
+    clkState = GPIO.input(clk)
+    dtState = GPIO.input(dt)
+    if clkState != clkLastState:
+            if dtState != clkState:
+                    desired_temp += 1
+            else:
+                    desired_temp -= 1
+            print("I changed!!!")
+    clkLastState = clkState
+    
 
 while flag:
     now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     time_left = int(time.time() - start)
     flag = (time_left <= duration)
     print(time_left)
+    #check_encoder()
     
     try:
         temp = DS18B20_SENSOR.get_temperature()

@@ -32,29 +32,30 @@
   </div>
 
 </form>
+<p><input class="btn btn-primary" type="submit" value="Clear Data">
 
-
-<table class = 'table table-striped'>
-  <tr>
-    <th>Temperature (C)</th>
-    <th>Voltage (V)</th>
-    <th>Time</th>
-
-
-  </tr>
-
-  {% for article in articles %}
-
-  <tr>
-    <td>{{article.temperature}}</td>
-    <td>{{article.voltage}}</td>
-    <td>{{article.time}}</td>
-  </tr>
-
-  {% endfor %}
-
-</table>
-
+<div style="height:300px;overflow:auto;">
+	<table class = 'table table-striped'>
+	  <tr>
+	    <th>Temperature (C)</th>
+	    
+	    <th>Time</th>
+	
+	
+	  </tr>
+	
+	  {% for article in articles %}
+	
+	  <tr>
+	    <td>{{article.temperature}}</td>
+	    
+	    <td>{{article.time}}</td>
+	  </tr>
+	
+	  {% endfor %}
+	
+	</table>
+</div>
 <a class = "btn btn-success" href="/export/<int:id>"s>Export</a>
 <div style="padding: 10px">
   {{histHtml}}

@@ -4,7 +4,7 @@ import time
 
 #variable assignments for the data pin and sensor data stream
 DHT_SENSOR = Adafruit_DHT.DHT11
-DHT_PIN=4
+DHT_PIN=23
 
 #the loop waits 3 seconds every pass, then reads the data streamed
 #from the gpio pins to the pi and displays temperature in Celcius

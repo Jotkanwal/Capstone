@@ -7,6 +7,7 @@
 #                /_/   /___/
 #
 #  lcd_16x2.py
+#  16x2 LCD Test Script
 #
 # Author : Matt Hawkins
 # Date   : 06/04/2015

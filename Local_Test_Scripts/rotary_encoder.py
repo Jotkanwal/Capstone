@@ -5,6 +5,7 @@ clk = 1
 dt = 0
 
 GPIO.setmode(GPIO.BCM)
+
 GPIO.setup(clk, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 GPIO.setup(dt, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 
