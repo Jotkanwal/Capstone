@@ -1,4 +1,5 @@
 from w1thermsensor import W1ThermSensor #https://pypi.org/project/w1thermsensor/
+import dht11 #https://pypi.org/project/dht11/
 from lcd_16x2 import lcd_16x2 #see lcd16_2.py
 from datetime import datetime #used for creating timestamps
 import time #used for waiting
@@ -16,14 +17,22 @@ def temp_control(desired_temp, duration):
         database = "capstone"
     )
     sql_cursor = TEMP_DB.cursor(buffered = True);
-
+    #variables
     HEATER_RELAY_PIN = 21
-    GPIO.setmode(GPIO.BCM)
-    GPIO.setup(HEATER_RELAY_PIN, GPIO.OUT)
-    LCD = lcd_16x2()
-    DS18B20_SENSOR = W1ThermSensor()
+    HEATER_LED_PIN = 24
+    temp = 0
+    cur_humidity = 0
     is_time_remaining = True
     heater_relay_status = False 
+    #GPIO Prep and assignments
+    GPIO.setwarnings(False)
+    GPIO.setmode(GPIO.BCM)
+    GPIO.setup(HEATER_RELAY_PIN, GPIO.OUT)
+    GPIO.setup(HEATER_LED_PIN, GPIO.OUT)
+    #LCD and sensor setup
+    LCD = lcd_16x2()
+    DS18B20_SENSOR = W1ThermSensor()
+    DHT11_SENSOR = dht11.DHT11(pin = 23)
     LCD.lcd_init()
 
     start = time.time();
@@ -38,12 +47,16 @@ def temp_control(desired_temp, duration):
         try:
             temp = DS18B20_SENSOR.get_temperature()
         except:
-            print("temp sensor read error, resetting sensors and temperature reading")
+            print("temp sensor read error, resetting temperature reading")
             temp = desired_temp + 1
+
+        #get humidity
+        readout = DHT11_SENSOR.read()
+        if readout.is_valid():
+            cur_humidity = readout.humidity
         
-        #in lieu of db entries, every 5 seconds write a data entry to historgram csv
+        #upload to our database every 5 seconds
         if time_left % 5 == 0:
-            #uploading to our database
             db_insert = "INSERT INTO data (temperature) VALUES (%s)" % (int(temp));
             print(db_insert);
             sql_cursor.execute(db_insert);
@@ -51,7 +64,7 @@ def temp_control(desired_temp, duration):
 
         #prepare the messages to send to the LCD
         lcd_lmsg1 = "Cu:%.1f De:%.1f" % (temp, desired_temp)
-        lcd_lmsg2 = "Heat:" + str(heater_relay_status)
+        lcd_lmsg2 = "Humidity:" + str(cur_humidity) + "%"
         
         #write LCD messages to terminal for debugging
         print("------------", now, "------------")
@@ -68,12 +81,14 @@ def temp_control(desired_temp, duration):
             if not heater_relay_status:
                 print("flipped relay on")
                 set_relay(HEATER_RELAY_PIN, False)
+                GPIO.output(HEATER_LED_PIN, True)
             heater_relay_status = True
         elif temp >= desired_temp:
             print("above")
             if heater_relay_status:  
                 print("flipped relay off")
                 set_relay(HEATER_RELAY_PIN, True)
+                GPIO.output(HEATER_LED_PIN, False)
             heater_relay_status = False
 
     print("time reached, shutting down")
