@@ -13,6 +13,7 @@ while True:
     humidity, temp = Adafruit_DHT.read(DHT_SENSOR, DHT_PIN)
     if humidity is not None and temp is not None:
         print("Temp={0:0.1f}C Humidity={1:0.1f}%".format(temp,humidity))
+        print(humidity)
     else:
         print("Sensor failure");
     time.sleep(3);
