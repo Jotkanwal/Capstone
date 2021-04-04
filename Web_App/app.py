@@ -22,8 +22,8 @@ app = Flask(__name__)
 
 #Config flask_MYQL
 app.config['MYSQL_HOST'] = 'localhost'
-app.config['MYSQL_USER'] = 'test'
-app.config['MYSQL_PASSWORD'] = 'asdf123'
+app.config['MYSQL_USER'] = 'root'
+app.config['MYSQL_PASSWORD'] = 'Poiu0981!('
 app.config['MYSQL_DB'] = 'capstone'
 app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
 
@@ -33,7 +33,7 @@ mysql = MySQL(app)
 # Histogram Generation Functions
 def GeneratePlot(numTimeIntervals) :
     data = GetTempHistData(numTimeIntervals)
-    print(data)
+
     if data == -1:
         return "<div><span>Unable to Generate Histogram</span></div>"
     timeData=[]
@@ -168,6 +168,23 @@ def logout():
     return redirect(url_for('login'))
 
 
+@app.route('/clearTable', methods=['GET', 'POST'])
+@is_logged_in
+def clearTable():
+    if request.method == 'POST':
+
+        cur=mysql.connection.cursor()
+        cur.execute("truncate table data")
+        mysql.connection.commit()
+        cur.close()
+        mostRecent=[]
+        form = controlForm(request.form)
+
+    return redirect(url_for('dashboard'))
+
+    #return render_template('dashboard.html', mostRecent=mostRecent, form = form)
+
+
 @app.route("/dashboard", methods=['GET', 'POST'])
 @is_logged_in
 def dashboard():
@@ -198,10 +215,12 @@ def dashboard():
     #print (result)
     articles = cur.fetchall()
 
+
     if result>0:
         return render_template('dashboard.html',articles=articles, form=form, mostRecent=mostRecent, histHtml=histogramHtmlText)
     else:
-        return render_template('dashboard.html',msg='No entries found')
+        mostRecent = {'id': 1, 'temperature': '_ ', 'voltage':'_ ' , 'time': datetime.datetime(2021, 4, 4, 13, 29, 14)}
+        return render_template('dashboard.html',msg='No entries found', form=form, mostRecent=mostRecent)
 
     cur.close()
 
@@ -211,11 +230,30 @@ class ArticleForm(Form):
     title=StringField('Title', [validators.Length(min=1, max=50)])
     body=TextAreaField('Body', [validators.Length(min=1)])
 
-@app.route('/download_csv')
+@app.route('/download_csv', methods = ['GET', 'POST'])
 def download():
- return render_template('download_csv.html')
+
+    cur = mysql.connection.cursor()
+    result = cur.execute("SELECT * FROM data")
+    articles = cur.fetchall()
+    print()
+
+    print()
 
 
+    File = open('DATA.csv', 'w+')
+    Data = csv.writer(File)
+
+    Data.writerow(('Temperature', 'Voltage', 'Time'))
+
+    for article in articles:
+        Data.writerow((article['temperature'], article['voltage'], article['time']))
+
+    File.close()
+    flash("Data saved to csv file")
+
+
+    return redirect(url_for('dashboard'))
 
 
 if __name__ == '__main__':
