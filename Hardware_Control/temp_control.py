@@ -59,7 +59,7 @@ def temp_control(desired_temp, duration):
         
         #upload to our database every 5 seconds
         if time_left % 5 == 0:
-            db_insert = "INSERT INTO data (temperature) VALUES (%s)" % (int(temp));
+            db_insert = "INSERT INTO data (temperature) VALUES ({temp})";
             print(db_insert);
             sql_cursor.execute(db_insert);
             TEMP_DB.commit();
