@@ -1,0 +1,7 @@
+graph:{
+  port_sharing:no
+  manhattan_edges:yes
+  layoutalgorithm:dfs
+  late_edge_labels:yes
+  title:"classes_temp_control_main.py"
+}

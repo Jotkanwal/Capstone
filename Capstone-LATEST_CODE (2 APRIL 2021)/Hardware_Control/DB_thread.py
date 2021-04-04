@@ -1,7 +1,7 @@
 from time import sleep
 import mysql.connector
 import threading
-import temp_control
+import temp_control.py
 
 
 global val
@@ -17,8 +17,8 @@ def db_checker():
     while x==True:
         mydb = mysql.connector.connect(
           host="localhost",
-          user="test",
-          password="asdf123",
+          user="root",
+          password="Poiu0981!(",
           database="capstone"
         )
 

@@ -1,5 +1,5 @@
 from w1thermsensor import W1ThermSensor #https://pypi.org/project/w1thermsensor/
-import Adafruit_DHT #https://pypi.org/project/Adafruit-DHT/
+import dht11 #https://pypi.org/project/dht11/
 from lcd_16x2 import lcd_16x2 #see lcd16_2.py
 from datetime import datetime #used for creating timestamps
 import time #used for waiting
@@ -17,10 +17,9 @@ def temp_control(desired_temp, duration):
         database = "capstone"
     )
     sql_cursor = TEMP_DB.cursor(buffered = True);
-    #pins and variables
+    #variables
     HEATER_RELAY_PIN = 21
     HEATER_LED_PIN = 24
-    DHT11_PIN = 23
     temp = 0
     cur_humidity = 0
     is_time_remaining = True
@@ -33,7 +32,7 @@ def temp_control(desired_temp, duration):
     #LCD and sensor setup
     LCD = lcd_16x2()
     DS18B20_SENSOR = W1ThermSensor()
-    DHT11_SENSOR = Adafruit_DHT.DHT11
+    DHT11_SENSOR = dht11.DHT11(pin = 23)
     LCD.lcd_init()
 
     start = time.time();
@@ -52,10 +51,9 @@ def temp_control(desired_temp, duration):
             temp = desired_temp + 1
 
         #get humidity
-        DHT_temp, DHT_himidity = Adafruit_DHT.read(DHT11_SENSOR, DHT11_PIN)
-        if DHT_himidity is not None:
-            print("setting humidity")
-            cur_humidity = DHT_himidity
+        readout = DHT11_SENSOR.read()
+        if readout.is_valid():
+            cur_humidity = readout.humidity
         
         #upload to our database every 5 seconds
         if time_left % 5 == 0:
@@ -82,14 +80,14 @@ def temp_control(desired_temp, duration):
             print("below")
             if not heater_relay_status:
                 print("flipped relay on")
-                set_relay(HEATER_RELAY_PIN, True)
+                set_relay(HEATER_RELAY_PIN, False)
                 GPIO.output(HEATER_LED_PIN, True)
             heater_relay_status = True
         elif temp >= desired_temp:
             print("above")
             if heater_relay_status:  
                 print("flipped relay off")
-                set_relay(HEATER_RELAY_PIN, False)
+                set_relay(HEATER_RELAY_PIN, True)
                 GPIO.output(HEATER_LED_PIN, False)
             heater_relay_status = False
 

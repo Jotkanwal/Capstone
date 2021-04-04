@@ -23,7 +23,7 @@ app = Flask(__name__)
 #Config flask_MYQL
 app.config['MYSQL_HOST'] = 'localhost'
 app.config['MYSQL_USER'] = 'test'
-app.config['MYSQL_PASSWORD'] = ''
+app.config['MYSQL_PASSWORD'] = 'asdf123'
 app.config['MYSQL_DB'] = 'capstone'
 app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
 
