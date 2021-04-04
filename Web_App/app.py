@@ -22,8 +22,8 @@ app = Flask(__name__)
 
 #Config flask_MYQL
 app.config['MYSQL_HOST'] = 'localhost'
-app.config['MYSQL_USER'] = 'test'
-app.config['MYSQL_PASSWORD'] = 'asdf123'
+app.config['MYSQL_USER'] = 'root'
+app.config['MYSQL_PASSWORD'] = 'Poiu0981!('
 app.config['MYSQL_DB'] = 'capstone'
 app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
 
@@ -79,8 +79,9 @@ class RegisterForm(Form):
     ])
     confirm = PasswordField('Confirm Password')
 
-class tempForm(Form):
+class controlForm(Form):
     temp = StringField('Set Temperature: ')
+    time = StringField('Time you want to hold this temperature: (in seconds)')
 
 #registeration
 @app.route('/register', methods = ['GET', 'POST'])
@@ -172,17 +173,20 @@ def logout():
 def dashboard():
     histogramHtmlText = Markup(GeneratePlot("3"))
 
-    form = tempForm(request.form)
+    form = controlForm(request.form)
     if request.method == 'POST' and form.validate():
         temp = form.temp.data
+        time = form.time.data
+
 
         cur = mysql.connection.cursor()
-        cur.execute("INSERT INTO temp(temp) VALUES (%s)",[temp])
+        cur.execute("INSERT INTO control(temp, time) VALUES(%s, %s)", (temp, time))
+
         mysql.connection.commit()
         cur.close()
 
 
-        flash("Temperature set")
+        flash("Temperature set to "+str(temp)+" for "+str(time)+" seconds.")
         return redirect(url_for('dashboard'))
 
     cur = mysql.connection.cursor()
