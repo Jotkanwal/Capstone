@@ -1,5 +1,5 @@
 from w1thermsensor import W1ThermSensor #https://pypi.org/project/w1thermsensor/
-import dht11 #https://pypi.org/project/dht11/
+import Adafruit_DHT #https://pypi.org/project/Adafruit-DHT/
 from lcd_16x2 import lcd_16x2 #see lcd16_2.py
 from datetime import datetime #used for creating timestamps
 import time #used for waiting
@@ -17,9 +17,10 @@ def temp_control(desired_temp, duration):
         database = "capstone"
     )
     sql_cursor = TEMP_DB.cursor(buffered = True);
-    #variables
+    #pins and variables
     HEATER_RELAY_PIN = 21
     HEATER_LED_PIN = 24
+    DHT11_PIN = 23
     temp = 0
     cur_humidity = 0
     is_time_remaining = True
@@ -32,7 +33,7 @@ def temp_control(desired_temp, duration):
     #LCD and sensor setup
     LCD = lcd_16x2()
     DS18B20_SENSOR = W1ThermSensor()
-    DHT11_SENSOR = dht11.DHT11(pin = 23)
+    DHT11_SENSOR = Adafruit_DHT.DHT11
     LCD.lcd_init()
 
     start = time.time();
@@ -51,9 +52,9 @@ def temp_control(desired_temp, duration):
             temp = desired_temp + 1
 
         #get humidity
-        readout = DHT11_SENSOR.read()
-        if readout.is_valid():
-            cur_humidity = readout.humidity
+        DHT_temp, DHT_himidity = Adafruit_DHT.read(DHT11_SENSOR, DHT11_PIN)
+        if DHT_himidity is not None:
+            cur_humidity = DHT_himidity
         
         #upload to our database every 5 seconds
         if time_left % 5 == 0:
