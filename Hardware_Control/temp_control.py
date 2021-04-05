@@ -23,6 +23,7 @@ def temp_control(desired_temp, duration):
     DHT11_PIN = 23
     temp = 0
     cur_humidity = 0
+    count = 0
     is_time_remaining = True
     heater_relay_status = False
     #GPIO Prep and assignments
@@ -91,9 +92,10 @@ def temp_control(desired_temp, duration):
                 set_relay(HEATER_RELAY_PIN, True)
                 GPIO.output(HEATER_LED_PIN, False)
             heater_relay_status = False
-
+        count = count + 1
     print("time reached, shutting down")
     #cleanup GPIO pin assignments
     set_relay(HEATER_RELAY_PIN, True)
+    GPIO.output(HEATER_LED_PIN, False)
     LCD.cleanup()
     GPIO.cleanup()
