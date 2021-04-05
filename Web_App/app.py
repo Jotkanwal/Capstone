@@ -22,8 +22,8 @@ app = Flask(__name__)
 
 #Config flask_MYQL
 app.config['MYSQL_HOST'] = 'localhost'
-app.config['MYSQL_USER'] = 'test'
-app.config['MYSQL_PASSWORD'] = 'asdf123'
+app.config['MYSQL_USER'] = 'root'
+app.config['MYSQL_PASSWORD'] = 'Poiu0981!('
 app.config['MYSQL_DB'] = 'capstone'
 app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
 
@@ -219,7 +219,7 @@ def dashboard():
     if result>0:
         return render_template('dashboard.html',articles=articles, form=form, mostRecent=mostRecent, histHtml=histogramHtmlText)
     else:
-        mostRecent = {'id': 1, 'temperature': '_ ', 'voltage':'_ ' , 'time': datetime.datetime(2021, 4, 4, 13, 29, 14)}
+        mostRecent = {'id': 1, 'temperature': '_ ', 'humidity':'_ ' , 'time': datetime.datetime(2021, 4, 4, 13, 29, 14)}
         return render_template('dashboard.html',msg='No entries found', form=form, mostRecent=mostRecent)
 
     cur.close()
@@ -244,10 +244,10 @@ def download():
     File = open('DATA.csv', 'w+')
     Data = csv.writer(File)
 
-    Data.writerow(('Temperature', 'Voltage', 'Time'))
+    Data.writerow(('Temperature', 'Humidity', 'Time'))
 
     for article in articles:
-        Data.writerow((article['temperature'], article['voltage'], article['time']))
+        Data.writerow((article['temperature'], article['humidity'], article['time']))
 
     File.close()
     flash("Data saved to csv file")
