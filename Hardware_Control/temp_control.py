@@ -24,7 +24,8 @@ def temp_control(desired_temp, duration):
     temp = 0
     cur_humidity = 0
     is_time_remaining = True
-    heater_relay_status = False 
+    heater_relay_status = False
+    count = 0
     #GPIO Prep and assignments
     GPIO.setwarnings(False)
     GPIO.setmode(GPIO.BCM)
@@ -39,7 +40,6 @@ def temp_control(desired_temp, duration):
     start = time.time();
     while is_time_remaining:
         #check time remaining on the timer
-        now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         time_left = int(time.time() - start)
         is_time_remaining = (time_left <= duration)
         print(duration - time_left)
@@ -54,13 +54,12 @@ def temp_control(desired_temp, duration):
         #get humidity
         DHT_temp, DHT_himidity = Adafruit_DHT.read(DHT11_SENSOR, DHT11_PIN)
         if DHT_himidity is not None:
-            print("setting humidity")
             cur_humidity = DHT_himidity
         
         #upload to our database every 5 seconds
-        if time_left % 5 == 0:
-            db_insert = "INSERT INTO data (temperature) VALUES ({temp})";
-            print(db_insert);
+        if count % 5 == 0:
+            db_insert = "INSERT INTO data (temperature) VALUES (%s)" % (temp);
+            print(db_insert)
             sql_cursor.execute(db_insert);
             TEMP_DB.commit();
 
@@ -69,7 +68,7 @@ def temp_control(desired_temp, duration):
         lcd_lmsg2 = "Humidity:" + str(cur_humidity) + "%"
         
         #write LCD messages to terminal for debugging
-        print("------------", now, "------------")
+        print("------------------------")
         print(lcd_lmsg1)
         print(lcd_lmsg2)
         
@@ -79,19 +78,20 @@ def temp_control(desired_temp, duration):
         
         #relay control based on being either above or below the desired temp
         if temp < desired_temp:
-            print("below")
             if not heater_relay_status:
                 print("flipped relay on")
-                set_relay(HEATER_RELAY_PIN, True)
+                set_relay(HEATER_RELAY_PIN, False)
                 GPIO.output(HEATER_LED_PIN, True)
             heater_relay_status = True
         elif temp >= desired_temp:
-            print("above")
-            if heater_relay_status:  
+            if heater_relay_status:
                 print("flipped relay off")
-                set_relay(HEATER_RELAY_PIN, False)
+                set_relay(HEATER_RELAY_PIN, True)
                 GPIO.output(HEATER_LED_PIN, False)
             heater_relay_status = False
+
+        #increment counter
+        count = count + 1
 
     print("time reached, shutting down")
     #cleanup GPIO pin assignments
