@@ -58,7 +58,7 @@ def temp_control(desired_temp, duration):
         
         #upload to our database every 5 seconds
         if count % 5 == 0:
-            db_insert = "INSERT INTO data (temperature, humidity) VALUES (%s, %s)" % (temp, cur_humidity);
+            db_insert = "INSERT INTO data (temperature, humidity) VALUES (%s, %s)", (temp, cur_humidity);
             print(db_insert)
             sql_cursor.execute(db_insert);
             TEMP_DB.commit();
@@ -98,3 +98,4 @@ def temp_control(desired_temp, duration):
     set_relay(HEATER_RELAY_PIN, True)
     LCD.cleanup()
     GPIO.cleanup()
+
