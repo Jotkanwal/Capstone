@@ -1,13 +1,12 @@
 from w1thermsensor import W1ThermSensor #https://pypi.org/project/w1thermsensor/
 import Adafruit_DHT #used for DHT humidity sensor
 from lcd_16x2 import lcd_16x2 #see lcd16_2.py
-from datetime import datetime #used for creating timestamps
 import time #used for waiting
 import RPi.GPIO as GPIO #raspi pin control
 import mysql.connector #import python-db connector
 
 def set_relay(pin, low_high):
-    GPIO.output(pin,low_high);
+    GPIO.output(pin,low_high)
 
 def temp_control(desired_temp, duration):
     TEMP_DB = mysql.connector.connect(
@@ -16,7 +15,7 @@ def temp_control(desired_temp, duration):
         password = "asdf123",
         database = "capstone"
     )
-    sql_cursor = TEMP_DB.cursor(buffered = True);
+    sql_cursor = TEMP_DB.cursor(buffered = True)
     #variables
     HEATER_RELAY_PIN = 21
     HEATER_LED_PIN = 24
@@ -40,7 +39,6 @@ def temp_control(desired_temp, duration):
     start = time.time();
     while is_time_remaining:
         #check time remaining on the timer
-        now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         time_left = int(time.time() - start)
         is_time_remaining = (time_left <= duration)
         print(duration - time_left)
@@ -59,17 +57,16 @@ def temp_control(desired_temp, duration):
 
         #upload to our database every 5 seconds
         if count % 5 == 0:
-            db_insert = "INSERT INTO data (temperature, humidity) VALUES (%s, %s)" % (temp, cur_humidity);
+            db_insert = "INSERT INTO data (temperature, humidity) VALUES (%s, %s)" % (temp, cur_humidity)
             print(db_insert)
-            sql_cursor.execute(db_insert);
-            TEMP_DB.commit();
+            sql_cursor.execute(db_insert)
+            TEMP_DB.commit()
 
         #prepare the messages to send to the LCD
         lcd_lmsg1 = "Cu:%.1f De:%.1f" % (temp, desired_temp)
         lcd_lmsg2 = "Humidity:" + str(cur_humidity) + "%"
 
         #write LCD messages to terminal for debugging
-        print("------------", now, "------------")
         print(lcd_lmsg1)
         print(lcd_lmsg2)
 
