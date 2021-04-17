@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30225.117
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TempHost", "TempHost\TempHost.csproj", "{EFB19E70-4A66-4EA7-8530-8F6E4D832650}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{EFB19E70-4A66-4EA7-8530-8F6E4D832650}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EFB19E70-4A66-4EA7-8530-8F6E4D832650}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EFB19E70-4A66-4EA7-8530-8F6E4D832650}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EFB19E70-4A66-4EA7-8530-8F6E4D832650}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {2B9F0E9B-F937-4D00-A06E-7CF7AC61D819}
+	EndGlobalSection
+EndGlobal
